@@ -7,15 +7,16 @@ Hack the Experience track | Data in the D 2026 Hackathon
 import streamlit as st
 import pandas as pd
 import json
+from snowflake.snowpark.context import get_active_session
 
 # ── Connection ──────────────────────────────────────────────
-conn = st.connection("snowflake")
+session = get_active_session()
 
 def run_query(sql, params=None):
-    return conn.session().sql(sql).to_pandas()
+    return session.sql(sql).to_pandas()
 
 def run_action(sql):
-    conn.session().sql(sql).collect()
+    session.sql(sql).collect()
 
 # ── Session State Init ──────────────────────────────────────
 if "current_view" not in st.session_state:
@@ -94,12 +95,10 @@ with st.sidebar:
 
     st.markdown("---")
     views = ["Table", "Kanban", "Dashboard", "Item Detail"]
-    for v in views:
-        if st.button(v, key=f"nav_{v}", use_container_width=True):
-            st.session_state["current_view"] = v
+    st.radio("View", views, key="current_view", label_visibility="collapsed")
 
     st.markdown("---")
-    st.toggle("Dark Mode", key="dark_mode")
+    st.checkbox("Dark Mode", key="dark_mode")
     st.markdown("---")
     st.markdown(f'<span style="font-size:11px;color:#666;">Hack the Experience | Data in the D 2026</span>', unsafe_allow_html=True)
 
